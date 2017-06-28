@@ -5,6 +5,11 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -18,12 +23,13 @@ public class WriterTest {
         String filename = "test_file";
         String expectedString = "yayyyy test string";
 
-        temporaryFolder.newFile(filename);
+        File tempFile = temporaryFolder.newFile(filename);
 
-        BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
-        writer.write(expectedString);
-        writer.close();
+        Files.write(tempFile.toPath(), Arrays.asList(expectedString), StandardOpenOption.WRITE);
 
-        assertThat(new BufferedReader(new FileReader(filename)).readLine(), is(expectedString));
+        List<String> records = Files.readAllLines(tempFile.toPath(), Charset.defaultCharset());
+
+        assertThat(records.get(0), is(expectedString));
+        assertThat(records.size(), is(1));
     }
 }
